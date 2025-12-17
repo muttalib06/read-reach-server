@@ -44,34 +44,34 @@ const client = new MongoClient(uri, {
   },
 });
 
-// // verify firebase token
-// const verifyFirebaseToken = async (req, res, next) => {
-//   // authHeader
-//   const authHeader = req.headers.authorization;
-//   if (!authHeader) {
-//     return res.status(401).send({ message: "Unauthorize" });
-//   }
+// verify firebase token
+const verifyFirebaseToken = async (req, res, next) => {
+  // authHeader
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "Unauthorize" });
+  }
 
-//   // extract token;
-//   const token = authHeader.split(" ")[1];
+  // extract token;
+  const token = authHeader.split(" ")[1];
 
-//   if (!token) {
-//     return res.status(401).send({ message: "Unauthorize" });
-//   }
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorize" });
+  }
 
-//   try {
-//     // verify firebase token
-//     const decoded = await admin.auth().verifyIdToken(token);
-//     console.log(decoded);
+  try {
+    // verify firebase token
+    const decoded = await admin.auth().verifyIdToken(token);
+    console.log(decoded);
 
-//     // attach decoded info to request;
-//     req.user = decoded;
-//     next();
-//   } catch (error) {
-//     console.log(error);
-//     res.status(403).send({ message: "Forbidden" });
-//   }
-// };
+    // attach decoded info to request;
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.log(error);
+    res.status(403).send({ message: "Forbidden" });
+  }
+};
 
 async function run() {
   try {
