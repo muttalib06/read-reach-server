@@ -87,29 +87,29 @@ async function run() {
 
     // create role checking middleware;
 
-    // const verifyRole = (allowedRoles) => {
-    //   return async (req, res, next) => {
-    //     try {
-    //       const email = req.user.email;
-    //       const user = await userCollection.findOne({ email });
-    //       console.log("after verify role", user);
-    //       if (!user) {
-    //         return res.status(401).send({ message: "Unauthorized access" });
-    //       }
-    //       if (!allowedRoles.includes(user.role)) {
-    //         return res.status(403).send({ message: "Forbidden access" });
-    //       }
+    const verifyRole = (allowedRoles) => {
+      return async (req, res, next) => {
+        try {
+          const email = req.user.email;
+          const user = await userCollection.findOne({ email });
+          console.log("after verify role", user);
+          if (!user) {
+            return res.status(401).send({ message: "Unauthorized access" });
+          }
+          if (!allowedRoles.includes(user.role)) {
+            return res.status(403).send({ message: "Forbidden access" });
+          }
 
-    //       // attach user to the request ;
+          // attach user to the request ;
 
-    //       req.dbUser = user;
-    //       next();
-    //     } catch (error) {
-    //       console.error("Role verification error:", error);
-    //       return res.status(500).send({ message: "Internal server error" });
-    //     }
-    //   };
-    // };
+          req.dbUser = user;
+          next();
+        } catch (error) {
+          console.error("Role verification error:", error);
+          return res.status(500).send({ message: "Internal server error" });
+        }
+      };
+    };
 
     //basic api;
     app.get("/", async (req, res) => {
