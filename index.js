@@ -84,6 +84,7 @@ async function run() {
     const orderCollection = database.collection("orders");
     const paymentCollection = database.collection("payments");
     const userCollection = database.collection("users");
+    const wishlistCollection = database.collection("wishlist");
 
     // create role checking middleware;
 
@@ -224,6 +225,47 @@ async function run() {
       }
     );
 
+    // wishlist api
+
+    app.post(
+      "/add-wishlist",
+      verifyFirebaseToken,
+      verifyRole(["user"]),
+      async (req, res) => {
+        const wishlistBook = req.body;
+
+        // prevent duplicate added book to the wishlist;
+        const existingBook = await wishlistCollection.findOne({
+          bookId: wishlistBook.bookId,
+          email: wishlistBook.email,
+        });
+
+        if (existingBook) {
+          return res.send({ message: "Already in Wishlist" });
+        }
+        const result = await wishlistCollection.insertOne(wishlistBook);
+        res.send(result);
+      }
+    );
+
+    app.get(
+      "/wishlist-books",
+      verifyFirebaseToken,
+      verifyRole(["user"]),
+      async (req, res) => {
+        const queryEmail = req.query.email;
+        const userEmail = req.user.email;
+        const query = {};
+        if (queryEmail) {
+          query.email = queryEmail;
+          if (queryEmail !== userEmail) {
+            return res.status(401).send({ message: "Unauthorized access" });
+          }
+        }
+        const result = await wishlistCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
     // user related api
 
     app.post("/users", async (req, res) => {
