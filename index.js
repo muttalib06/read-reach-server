@@ -437,7 +437,7 @@ async function run() {
     app.patch(
       "/update-order-status/:orderId",
       verifyFirebaseToken,
-      verifyRole(["librarian"]),
+      // verifyRole(["librarian"]),
       async (req, res) => {
         const { orderStatus } = req.body;
         const orderId = req.params.orderId;
