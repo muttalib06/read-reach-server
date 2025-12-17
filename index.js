@@ -495,56 +495,56 @@ async function run() {
 
     // payment verification and update
 
-    // app.get("/payment-status/:paymentIntentId", async (req, res) => {
-    //   try {
-    //     const { paymentIntentId } = req.params;
-    //     // retrieve session from stripe;
-    //     const session = await stripe.checkout.sessions.retrieve(
-    //       paymentIntentId
-    //     );
-    //     console.log("session result", session);
+    app.get("/payment-status/:paymentIntentId", async (req, res) => {
+      try {
+        const { paymentIntentId } = req.params;
+        // retrieve session from stripe;
+        const session = await stripe.checkout.sessions.retrieve(
+          paymentIntentId
+        );
+        console.log("session result", session);
 
-    //     // save payment info to the database;
+        // save payment info to the database;
 
-    //     const paymentInfo = {
-    //       transactionId: session.payment_intent,
-    //       createdAt: new Date(),
-    //       amount: session.amount_total,
-    //       bookName: session.metadata.bookName,
-    //       email: session.customer_email,
-    //     };
+        const paymentInfo = {
+          transactionId: session.payment_intent,
+          createdAt: new Date(),
+          amount: session.amount_total,
+          bookName: session.metadata.bookName,
+          email: session.customer_email,
+        };
 
-    //     // prevent duplicate payment data;
+        // prevent duplicate payment data;
 
-    //     const existingPayment = await paymentCollection.findOne({
-    //       transactionId: session.payment_intent,
-    //     });
+        const existingPayment = await paymentCollection.findOne({
+          transactionId: session.payment_intent,
+        });
 
-    //     if (!existingPayment) {
-    //       await paymentCollection.insertOne(paymentInfo);
-    //     }
+        if (!existingPayment) {
+          await paymentCollection.insertOne(paymentInfo);
+        }
 
-    //     // update payment status inside order data;
+        // update payment status inside order data;
 
-    //     if (session.payment_status === "paid") {
-    //       const orderId = session.metadata.orderId;
-    //       const query = { _id: new ObjectId(orderId) };
-    //       const updateDoc = {
-    //         $set: {
-    //           payment: "paid",
-    //           status: "processing",
-    //         },
-    //       };
-    //       await orderCollection.updateOne(query, updateDoc);
-    //     }
+        if (session.payment_status === "paid") {
+          const orderId = session.metadata.orderId;
+          const query = { _id: new ObjectId(orderId) };
+          const updateDoc = {
+            $set: {
+              payment: "paid",
+              status: "processing",
+            },
+          };
+          await orderCollection.updateOne(query, updateDoc);
+        }
 
-    //     // send session to the client
-    //     res.json(session);
-    //   } catch (error) {
-    //     console.error("Payment status error:", error);
-    //     res.status(500).json({ error: "Failed to retrieve payment status" });
-    //   }
-    // });
+        // send session to the client
+        res.json(session);
+      } catch (error) {
+        console.error("Payment status error:", error);
+        res.status(500).json({ error: "Failed to retrieve payment status" });
+      }
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
