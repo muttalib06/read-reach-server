@@ -266,6 +266,23 @@ async function run() {
         res.send(result);
       }
     );
+
+    app.delete(
+      "/delete-wishlist-book/:bookId",
+      verifyFirebaseToken,
+      verifyRole(["user"]),
+      async (req, res) => {
+        const bookId = req.params.bookId;
+        const userEmail = req.user.email;
+        if (!userEmail)
+          return res.status(400).send({ message: "User email missing" });
+        const result = await wishlistCollection.deleteOne({
+          bookId: bookId,
+          email: userEmail,
+        });
+        res.send(result);
+      }
+    );
     // user related api
 
     app.post("/users", async (req, res) => {
