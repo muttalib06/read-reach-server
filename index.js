@@ -23,7 +23,7 @@ admin.initializeApp({
 });
 
 // domain
-const CLIENT_DOMAIN = "http://localhost:5173";
+const CLIENT_DOMAIN = "https://read-reach-client.pages.dev";
 
 // generating tracking id;
 
