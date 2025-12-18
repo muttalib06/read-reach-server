@@ -62,7 +62,6 @@ const verifyFirebaseToken = async (req, res, next) => {
   try {
     // verify firebase token
     const decoded = await admin.auth().verifyIdToken(token);
-  
 
     // attach decoded info to request;
     req.user = decoded;
@@ -93,7 +92,7 @@ async function run() {
         try {
           const email = req.user.email;
           const user = await userCollection.findOne({ email });
-       
+
           if (!user) {
             return res.status(401).send({ message: "Unauthorized access" });
           }
@@ -536,42 +535,47 @@ async function run() {
 
     // create checkout session;
 
-    app.post("/create-checkout-session",verifyFirebaseToken, verifyRole(["user"]), async (req, res) => {
-      try {
-        const { orderName, email, price, bookId } = req.body;
-        const session = await stripe.checkout.sessions.create({
-          payment_method_types: ["card"],
-          line_items: [
-            {
-              price_data: {
-                currency: "usd",
-                product_data: {
-                  name: orderName,
+    app.post(
+      "/create-checkout-session",
+      verifyFirebaseToken,
+      verifyRole(["user"]),
+      async (req, res) => {
+        try {
+          const { orderName, email, price, bookId } = req.body;
+          const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [
+              {
+                price_data: {
+                  currency: "usd",
+                  product_data: {
+                    name: orderName,
+                  },
+                  unit_amount: parseInt(price) * 100,
                 },
-                unit_amount: parseInt(price) * 100,
+                quantity: 1,
               },
-              quantity: 1,
+            ],
+            mode: "payment",
+            customer_email: email,
+            metadata: {
+              orderId: bookId,
+              bookName: orderName,
             },
-          ],
-          mode: "payment",
-          customer_email: email,
-          metadata: {
-            orderId: bookId,
-            bookName: orderName,
-          },
 
-          success_url: `${CLIENT_DOMAIN}/dashboard/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${CLIENT_DOMAIN}/cancel`,
-        });
+            success_url: `${CLIENT_DOMAIN}/dashboard/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${CLIENT_DOMAIN}/cancel`,
+          });
 
-        res.json({
-          url: session.url,
-        });
-      } catch (error) {
-        console.log("Error creating checkout session", error);
-        res.status(500).send(error);
+          res.json({
+            url: session.url,
+          });
+        } catch (error) {
+          console.log("Error creating checkout session", error);
+          res.status(500).send(error);
+        }
       }
-    });
+    );
 
     // payment verification and update
 
@@ -582,7 +586,6 @@ async function run() {
         const session = await stripe.checkout.sessions.retrieve(
           paymentIntentId
         );
-      
 
         // save payment info to the database;
 
@@ -627,7 +630,7 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
