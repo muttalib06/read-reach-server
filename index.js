@@ -486,7 +486,7 @@ async function run() {
     app.post(
       "/order",
       verifyFirebaseToken,
-      verifyRole(["user","librarian","admin"]),
+      verifyRole(["user",]),
       async (req, res) => {
         const orderInfo = req.body;
         const result = await orderCollection.insertOne(orderInfo);
