@@ -536,7 +536,7 @@ async function run() {
 
     // create checkout session;
 
-    app.post("/create-checkout-session", async (req, res) => {
+    app.post("/create-checkout-session",verifyFirebaseToken, verifyRole(["user"]), async (req, res) => {
       try {
         const { orderName, email, price, bookId } = req.body;
         const session = await stripe.checkout.sessions.create({
