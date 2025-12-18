@@ -62,7 +62,7 @@ const verifyFirebaseToken = async (req, res, next) => {
   try {
     // verify firebase token
     const decoded = await admin.auth().verifyIdToken(token);
-    console.log(decoded);
+  
 
     // attach decoded info to request;
     req.user = decoded;
@@ -93,7 +93,7 @@ async function run() {
         try {
           const email = req.user.email;
           const user = await userCollection.findOne({ email });
-          console.log("after verify role", user);
+       
           if (!user) {
             return res.status(401).send({ message: "Unauthorized access" });
           }
@@ -424,6 +424,22 @@ async function run() {
       }
     );
 
+    app.get(
+      "/orderByIdAndEmail",
+      verifyFirebaseToken,
+      verifyRole(["user"]),
+      async (req, res) => {
+        const { email, bookId } = req.query;
+        const query = {
+          email: email,
+          bookId: bookId,
+        };
+
+        const result = await orderCollection.findOne(query);
+        res.send(result);
+      }
+    );
+
     app.get("/recent-orders", async (req, res) => {
       const { email } = req.query;
       const query = { email };
@@ -468,11 +484,16 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/order", async (req, res) => {
-      const orderInfo = req.body;
-      const result = await orderCollection.insertOne(orderInfo);
-      res.send(result);
-    });
+    app.post(
+      "/order",
+      verifyFirebaseToken,
+      verifyRole(["user"]),
+      async (req, res) => {
+        const orderInfo = req.body;
+        const result = await orderCollection.insertOne(orderInfo);
+        res.send(result);
+      }
+    );
 
     app.patch(
       "/order-status/:orderId",
@@ -561,7 +582,7 @@ async function run() {
         const session = await stripe.checkout.sessions.retrieve(
           paymentIntentId
         );
-        console.log("session result", session);
+      
 
         // save payment info to the database;
 
