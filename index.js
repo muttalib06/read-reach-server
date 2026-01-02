@@ -23,7 +23,7 @@ admin.initializeApp({
 });
 
 // domain
-const CLIENT_DOMAIN = "https://read-reach-client.pages.dev";
+const CLIENT_DOMAIN = "https://read-reach-client.vercel.app";
 
 // generating tracking id;
 
